@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Iris Species Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h2 {
+            font-weight: 700;
+        }
+        .result-box {
+            background: #e9f7ef;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #155724;
+        }
+        pre {
+            background: #1e1e1e;
+            color: #00ffcc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        table th, table td {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container mt-5">
+    <div class="card p-4">
+        <h2 class="text-center text-primary">🌸 Iris Species Prediction</h2>
+        <hr>
+
+        <!-- Input Form -->
+        <form id="predictForm">
+            <div class="row">
+                <div class="col-md-3">
+                    <label>Sepal Length (cm)</label>
+                    <input type="number" step="any" class="form-control" id="sepal_length" required>
+                </div>
+                <div class="col-md-3">
+                    <label>Sepal Width (cm)</label>
+                    <input type="number" step="any" class="form-control" id="sepal_width" required>
+                </div>
+                <div class="col-md-3">
+                    <label>Petal Length (cm)</label>
+                    <input type="number" step="any" class="form-control" id="petal_length" required>
+                </div>
+                <div class="col-md-3">
+                    <label>Petal Width (cm)</label>
+                    <input type="number" step="any" class="form-control" id="petal_width" required>
+                </div>
+            </div>
+
+            <!-- Model Selection -->
+            <div class="row mt-3">
+                <div class="col-md-4 mx-auto">
+                    <label><strong>Select Model</strong></label>
+                    <select class="form-control" id="model">
+                        <option value="knn">KNN Model</option>
+                        <option value="nb">Naive Bayes Model</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success btn-lg">
+                    Predict Species
+                </button>
+            </div>
+        </form>
+
+        <!-- Prediction Result -->
+        <div class="mt-4">
+            <h5>Predicted Species</h5>
+            <div class="result-box" id="predictionResult">
+                Waiting for prediction...
+            </div>
+        </div>
+
+        <!-- Confusion Matrix -->
+        <div class="mt-4">
+            <h5>Confusion Matrix</h5>
+            <table class="table table-bordered table-striped mt-2">
+                <thead class="thead-dark">
+                    <tr>
+                        <th></th>
+                        <th>Setosa</th>
+                        <th>Versicolor</th>
+                        <th>Virginica</th>
+                    </tr>
+                </thead>
+                <tbody id="confusionMatrix">
+                    <tr>
+                        <th>Setosa</th>
+                        <td>0</td><td>0</td><td>0</td>
+                    </tr>
+                    <tr>
+                        <th>Versicolor</th>
+                        <td>0</td><td>0</td><td>0</td>
+                    </tr>
+                    <tr>
+                        <th>Virginica</th>
+                        <td>0</td><td>0</td><td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Classification Report -->
+        <div class="mt-4">
+            <h5>Classification Report</h5>
+            <pre id="classificationReport">
+Waiting for report...
+            </pre>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+document.getElementById("predictForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const data = {
+        sepal_length: document.getElementById("sepal_length").value,
+        sepal_width: document.getElementById("sepal_width").value,
+        petal_length: document.getElementById("petal_length").value,
+        petal_width: document.getElementById("petal_width").value,
+        model: document.getElementById("model").value
+    };
+
+    fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(response => {
+
+        // Prediction
+        document.getElementById("predictionResult").innerText =
+            "🌼 " + response.prediction;
+
+        // Confusion Matrix
+        let cm = response.confusion_matrix;
+        let rows = document.getElementById("confusionMatrix").rows;
+
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                rows[i].cells[j + 1].innerText = cm[i][j];
+            }
+        }
+
+        // Classification Report
+        document.getElementById("classificationReport").innerText =
+            response.classification_report;
+    })
+    .catch(err => {
+        alert("Error connecting to server");
+        console.error(err);
+    });
+});
+</script>
+
+</body>
+</html>
