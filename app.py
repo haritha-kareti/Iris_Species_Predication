@@ -1,8 +1,7 @@
-from flask import Flask, render_template, request, jsonify
-import pickle
+from flask import Flask, render_template, request
 import numpy as np
+import pickle
 import json
-from sklearn.metrics import confusion_matrix, classification_report
 
 app = Flask(__name__)
 
@@ -16,100 +15,79 @@ with open("NB_Model.pkl", "rb") as f:
     nb_model = pickle.load(f)
 
 # --------------------------------------------------
-# Load TRAIN data
+# Load Performance JSON Files
 # --------------------------------------------------
-with open("train_data.json", "r") as f:
-    train_data = json.load(f)
+def load_json(file):
+    with open(file, "r") as f:
+        return json.load(f)
 
-X_train = np.array(train_data["X_train"])
-y_train = np.array(train_data["y_train"])
+train_knn = load_json("train_data_KNN.json")
+test_knn = load_json("test_data_KNN.json")
 
-with open("train_data1.json", "r") as f:
-    train_data1 = json.load(f)
+train_nb = load_json("train_data_NB.json")
+test_nb = load_json("test_data_NB.json")
 
-X_train = np.array(train_data1["X_train"])
-y_train = np.array(train_data1["y_train"])
-
-# --------------------------------------------------
-# Load TEST data
-# --------------------------------------------------
-with open("test_data.json", "r") as f:
-    test_data = json.load(f)
-
-X_test = np.array(test_data["X_test"])
-y_test = np.array(test_data["y_test"])
-
-with open("test_data1.json", "r") as f:
-    test_data1 = json.load(f)
-
-X_test = np.array(test_data1["X_test"])
-y_test = np.array(test_data1["y_test"])
 
 # --------------------------------------------------
-# Class Labels
-# --------------------------------------------------
-labels = ["Setosa", "Versicolor", "Virginica"]
-
-# --------------------------------------------------
-# Routes
+# Home Route
 # --------------------------------------------------
 @app.route("/")
-def index():
+def home():
     return render_template("index.html")
 
 
+# --------------------------------------------------
+# Prediction Route
+# --------------------------------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
-    data = request.get_json()
 
-    # Input from UI
-    input_features = np.array([[
-        float(data["sepal_length"]),
-        float(data["sepal_width"]),
-        float(data["petal_length"]),
-        float(data["petal_width"])
-    ]])
+    model_choice = request.form["model"]
 
-    # --------------------------------------------------
-    # Model Selection from UI
-    # --------------------------------------------------
-    model_name = data.get("model", "knn")
+    features = [
+        float(request.form["feature1"]),
+        float(request.form["feature2"]),
+        float(request.form["feature3"]),
+        float(request.form["feature4"])
+    ]
 
-    if model_name == "nb":
-        model = nb_model
-        model_used = "Naive Bayes"
-    else:
+    input_data = np.array([features])
+
+    # Model Selection
+    if model_choice == "knn":
         model = knn_model
-        model_used = "KNN"
+        train_data = train_knn
+        test_data = test_knn
 
-    # --------------------------------------------------
-    # Predict single input
-    # --------------------------------------------------
-    pred_class = model.predict(input_features)[0]
-    prediction = labels[int(pred_class)]
+    elif model_choice == "nb":
+        model = nb_model
+        train_data = train_nb
+        test_data = test_nb
 
-    # --------------------------------------------------
-    # Evaluate model on TEST data
-    # --------------------------------------------------
-    y_pred_test = model.predict(X_test)
+    else:
+        return "Invalid Model Selected"
 
-    cm = confusion_matrix(y_test, y_pred_test).tolist()
-    cr = classification_report(
-        y_test,
-        y_pred_test,
-        target_names=labels
+    prediction = model.predict(input_data)[0]
+
+    return render_template(
+        "index.html",
+        prediction=prediction,
+        model_name=train_data["model_name"],
+
+        # TRAIN DATA
+        train_accuracy=train_data["accuracy"],
+        train_confusion=train_data["confusion_matrix"],
+        train_report=train_data["classification_report"],
+
+        # TEST DATA
+        test_accuracy=test_data["accuracy"],
+        test_confusion=test_data["confusion_matrix"],
+        test_report=test_data["classification_report"]
     )
-
-    return jsonify({
-        "prediction": prediction,
-        "model_used": model_used,
-        "confusion_matrix": cm,
-        "classification_report": cr
-    })
 
 
 # --------------------------------------------------
-# Run Server
+# Run App
 # --------------------------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
