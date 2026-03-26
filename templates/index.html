@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Iris Species Prediction</title>
+    <title>Iris Classification</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap -->
@@ -10,174 +9,288 @@
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
     <style>
-        body {
-            background: #f4f6f9;
-        }
-        .card {
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        h2 {
-            font-weight: 700;
-        }
-        .result-box {
-            background: #e9f7ef;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            color: #155724;
-        }
-        pre {
-            background: #1e1e1e;
-            color: #00ffcc;
-            padding: 15px;
-            border-radius: 8px;
-        }
-        table th, table td {
-            text-align: center;
-        }
-    </style>
-</head>
+    body {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+    }
 
+    .main-box {
+        margin-top: 40px;
+        padding: 25px;
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+        font-weight: 700;
+        color: #4a47a3;
+    }
+
+    .card, .left-box, .right-box {
+        background: #fdfdfd;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    input.form-control {
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        transition: 0.3s;
+    }
+
+    input.form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 8px rgba(102,126,234,0.4);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        border-radius: 8px;
+        padding: 8px 18px;
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, #5a67d8, #6b46c1);
+    }
+
+    .btn-secondary {
+        border-radius: 8px;
+        padding: 8px 18px;
+    }
+
+    .result-box {
+        margin-top: 20px;
+        background: linear-gradient(135deg, #d4fc79, #96e6a1);
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #155724;
+        text-align: center;
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    table {
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    table th {
+        background: #667eea;
+        color: white;
+    }
+
+    table td, table th {
+        text-align: center;
+        padding: 10px;
+    }
+
+    hr {
+        border-top: 2px solid #eee;
+    }
+
+    h5 {
+        font-weight: 600;
+    }
+
+    h6 {
+        margin-top: 15px;
+        font-weight: 600;
+        color: #555;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .right-box {
+            margin-top: 20px;
+            padding-left: 0 !important;
+        }
+    }
+</style>
+</head>
 <body>
 
-<div class="container mt-5">
-    <div class="card p-4">
-        <h2 class="text-center text-primary">🌸 Iris Species Prediction</h2>
-        <hr>
+<div class="container">
+    <div class="main-box">
 
-        <!-- Input Form -->
-        <form id="predictForm">
-            <div class="row">
-                <div class="col-md-3">
-                    <label>Sepal Length (cm)</label>
-                    <input type="number" step="any" class="form-control" id="sepal_length" required>
+        <h2 class="text-center mb-4">
+             Iris Species Classification
+        </h2>
+
+        <div class="row">
+
+            <!-- LEFT SIDE -->
+            <div class="col-md-4 left-box">
+
+                <form action="/predict" method="POST">
+
+                    <div class="form-group">
+                        <label>Sepal Length (SL)</label>
+                        <input type="number" step="any" name="feature1" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Sepal Width (SW)</label>
+                        <input type="number" step="any" name="feature2" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Petal Length (PL)</label>
+                        <input type="number" step="any" name="feature3" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Petal Width (PW)</label>
+                        <input type="number" step="any" name="feature4" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Model</label><br>
+                        <input type="radio" name="model" value="knn" required> KNN
+                        <input type="radio" name="model" value="nb" class="ml-3"> NB
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Predict</button>
+                    <button type="button" class="btn btn-secondary ml-2" onclick="window.location.href='/'">Reset</button>
+
+
+                </form>
+
+                {% if prediction is defined %}
+                <div class="result-box">
+                    Prediction :
+                    {% if prediction == 0 %}
+                        Setosa
+                    {% elif prediction == 1 %}
+                        Versicolor
+                    {% else %}
+                        Virginica
+                    {% endif %}
                 </div>
-                <div class="col-md-3">
-                    <label>Sepal Width (cm)</label>
-                    <input type="number" step="any" class="form-control" id="sepal_width" required>
-                </div>
-                <div class="col-md-3">
-                    <label>Petal Length (cm)</label>
-                    <input type="number" step="any" class="form-control" id="petal_length" required>
-                </div>
-                <div class="col-md-3">
-                    <label>Petal Width (cm)</label>
-                    <input type="number" step="any" class="form-control" id="petal_width" required>
-                </div>
+                {% endif %}
+
             </div>
 
-            <!-- Model Selection -->
-            <div class="row mt-3">
-                <div class="col-md-4 mx-auto">
-                    <label><strong>Select Model</strong></label>
-                    <select class="form-control" id="model">
-                        <option value="knn">KNN Model</option>
-                        <option value="nb">Naive Bayes Model</option>
-                    </select>
-                </div>
+
+            <!-- RIGHT SIDE -->
+            <div class="col-md-8 right-box pl-4">
+
+                {% if train_accuracy is defined %}
+
+                <h4>Model : {{ model_name }}</h4>
+
+                <!-- TRAIN -->
+                <hr>
+                <h5 class="text-primary">Train Performance</h5>
+
+                <p><b>Train Accuracy :</b> {{ train_accuracy }}</p>
+
+                <h6>Train Confusion Matrix</h6>
+                <table class="table table-bordered">
+                    {% for row in train_confusion %}
+                    <tr>
+                        {% for item in row %}
+                        <td>{{ item }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </table>
+
+                <h6>Train Classification Report</h6>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Class</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>F1-score</th>
+                        <th>Support</th>
+                    </tr>
+
+                    {% for key, value in train_report.items() %}
+                        {% if key in ['0','1','2'] %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td>{{ value['precision'] }}</td>
+                            <td>{{ value['recall'] }}</td>
+                            <td>{{ value['f1-score'] }}</td>
+                            <td>{{ value['support'] }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+
+                <!-- TEST -->
+                <hr>
+                <h5 class="text-success">Test Performance</h5>
+
+                <p><b>Test Accuracy :</b> {{ test_accuracy }}</p>
+
+                <h6>Test Confusion Matrix</h6>
+                <table class="table table-bordered">
+                    {% for row in test_confusion %}
+                    <tr>
+                        {% for item in row %}
+                        <td>{{ item }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </table>
+
+                <h6>Test Classification Report</h6>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Class</th>
+                        <th>Precision</th>
+                        <th>Recall</th>
+                        <th>F1-score</th>
+                        <th>Support</th>
+                    </tr>
+
+                    {% for key, value in test_report.items() %}
+                        {% if key in ['0','1','2'] %}
+                        <tr>
+                            <td>{{ key }}</td>
+                            <td>{{ value['precision'] }}</td>
+                            <td>{{ value['recall'] }}</td>
+                            <td>{{ value['f1-score'] }}</td>
+                            <td>{{ value['support'] }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+
+                {% endif %}
+
             </div>
 
-            <div class="text-center mt-4">
-                <button type="submit" class="btn btn-success btn-lg">
-                    Predict Species
-                </button>
-            </div>
-        </form>
-
-        <!-- Prediction Result -->
-        <div class="mt-4">
-            <h5>Predicted Species</h5>
-            <div class="result-box" id="predictionResult">
-                Waiting for prediction...
-            </div>
         </div>
 
-        <!-- Confusion Matrix -->
-        <div class="mt-4">
-            <h5>Confusion Matrix</h5>
-            <table class="table table-bordered table-striped mt-2">
-                <thead class="thead-dark">
-                    <tr>
-                        <th></th>
-                        <th>Setosa</th>
-                        <th>Versicolor</th>
-                        <th>Virginica</th>
-                    </tr>
-                </thead>
-                <tbody id="confusionMatrix">
-                    <tr>
-                        <th>Setosa</th>
-                        <td>0</td><td>0</td><td>0</td>
-                    </tr>
-                    <tr>
-                        <th>Versicolor</th>
-                        <td>0</td><td>0</td><td>0</td>
-                    </tr>
-                    <tr>
-                        <th>Virginica</th>
-                        <td>0</td><td>0</td><td>0</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Classification Report -->
-        <div class="mt-4">
-            <h5>Classification Report</h5>
-            <pre id="classificationReport">
-Waiting for report...
-            </pre>
-        </div>
     </div>
 </div>
-
-<!-- JavaScript -->
-<script>
-document.getElementById("predictForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-
-    const data = {
-        sepal_length: document.getElementById("sepal_length").value,
-        sepal_width: document.getElementById("sepal_width").value,
-        petal_length: document.getElementById("petal_length").value,
-        petal_width: document.getElementById("petal_width").value,
-        model: document.getElementById("model").value
-    };
-
-    fetch("/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(response => {
-
-        // Prediction
-        document.getElementById("predictionResult").innerText =
-            "🌼 " + response.prediction;
-
-        // Confusion Matrix
-        let cm = response.confusion_matrix;
-        let rows = document.getElementById("confusionMatrix").rows;
-
-        for (let i = 0; i < 3; i++) {
-            for (let j = 0; j < 3; j++) {
-                rows[i].cells[j + 1].innerText = cm[i][j];
-            }
-        }
-
-        // Classification Report
-        document.getElementById("classificationReport").innerText =
-            response.classification_report;
-    })
-    .catch(err => {
-        alert("Error connecting to server");
-        console.error(err);
-    });
-});
-</script>
 
 </body>
 </html>
